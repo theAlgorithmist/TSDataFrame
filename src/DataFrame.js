@@ -29,6 +29,54 @@ var TSMT$DataFrame = (function () {
         this._category = "";
     }
     /**
+     * Assign the data frame from an array of Objects, where each Object key corresponds to a category label.  It is
+     * acceptable to have an 'id' or an '_id' key as these will automatically be removed from the category label list
+     * (the latter is common for auto-insertion into Mongo).
+     *
+     * @param data : Array - Each element is an Object whose keys correspond to category labels.
+     *
+     * @param dataTypes:Array - One element for each column that indicates the type of data - must be Table.NUMERIC,
+     * TABLE.CHARACTER, or TABLE.BOOLEAN.  The number of elements in this array must be the same as the number of elements
+     * in the first array of the data parameter
+     *
+     * @return Nothing - The internal table is assigned provided that all input is valid
+     */
+    TSMT$DataFrame.prototype.fromArrayObj = function (data, dataTypes) {
+        if (data == undefined || data == null || data.length < 1) {
+            return;
+        }
+        if (!dataTypes || dataTypes.length == 0) {
+            return;
+        }
+        var keys = Object.keys(data[0]);
+        // remove '_id' and 'id'
+        var index = keys.indexOf('_id');
+        if (index != -1) {
+            keys.splice(index, 1);
+        }
+        index = keys.indexOf('id');
+        if (index != -1) {
+            keys.splice(index, 1);
+        }
+        var numKeys = keys.length;
+        var items = data.length;
+        this._categories = keys.slice();
+        // process each object into the data table
+        var i;
+        var j;
+        var dataItem;
+        // build the table column-major
+        for (j = 0; j < numKeys; ++j) {
+            this._table.push(new Array());
+        }
+        for (i = 0; i < items; ++i) {
+            dataItem = data[i];
+            for (j = 0; j < numKeys; ++j) {
+                this._table[j].push(dataItem[keys[j]]);
+            }
+        }
+    };
+    /**
      * Assign the data frame from an array of arrays (where the first row ALWAYS contains the category labels)
      *
      * @param data : Array - Each element is an array containing one row of data and the first row is ALWAYS the category labels
@@ -40,7 +88,7 @@ var TSMT$DataFrame = (function () {
      * @return Nothing - The internal table is assigned provided that all input is valid
      */
     TSMT$DataFrame.prototype.fromArray = function (data, dataTypes) {
-        if (!data || data.length < 2) {
+        if (data == undefined || data == null || data.length < 2) {
             return;
         }
         if (!dataTypes || dataTypes.length == 0) {

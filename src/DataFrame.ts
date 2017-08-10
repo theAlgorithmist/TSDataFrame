@@ -21,6 +21,8 @@
  * each category.  Thus, category data is down columns and must be consistent along each column (i.e. do not mix numeric
  * and character data in the same column).
  *
+ * NOTE: Category labels (column names) are CASE SENSITIVE.
+ *
  * @author Jim Armstrong (www.algorithmist.net)
  *
  * @version 1.0
@@ -51,6 +53,65 @@ export class TSMT$DataFrame
     this._column     = new Array<tableData>();
     this._category   = "";
   }
+  /**
+   * Assign the data frame from an array of Objects, where each Object key corresponds to a category label.  It is
+   * acceptable to have an 'id' or an '_id' key as these will automatically be removed from the category label list
+   * (the latter is common for auto-insertion into Mongo).
+   *
+   * @param data : Array - Each element is an Object whose keys correspond to category labels.
+   *
+   * @param dataTypes:Array - One element for each column that indicates the type of data - must be Table.NUMERIC,
+   * TABLE.CHARACTER, or TABLE.BOOLEAN.  The number of elements in this array must be the same as the number of elements
+   * in the first array of the data parameter
+   *
+   * @return Nothing - The internal table is assigned provided that all input is valid
+   */
+  public fromArrayObj(data: Array<Object>, dataTypes: Array<number>): void
+  {
+    if (data == undefined || data == null || data.length < 1) {
+      return;
+    }
+
+    if (!dataTypes || dataTypes.length == 0) {
+      return;
+    }
+
+    const keys: Array<string> = Object.keys(data[0]);
+
+    // remove '_id' and 'id'
+    let index: number = keys.indexOf('_id');
+    if (index != -1) {
+      keys.splice(index, 1);
+    }
+
+    index = keys.indexOf('id');
+    if (index != -1) {
+      keys.splice(index, 1);
+    }
+
+    const numKeys: number = keys.length;
+    const items: number   = data.length;
+    this._categories      = keys.slice();
+
+    // process each object into the data table
+    let i: number;
+    let j: number;
+    let dataItem: Object;
+
+    // build the table column-major
+    for (j = 0; j < numKeys; ++j) {
+      this._table.push( new Array<tableData>() );
+    }
+
+    for (i = 0; i < items; ++i)
+    {
+      dataItem = data[i];
+
+      for (j = 0; j < numKeys; ++j) {
+        this._table[j].push( dataItem[keys[j]] );
+      }
+    }
+  }
 
   /**
    * Assign the data frame from an array of arrays (where the first row ALWAYS contains the category labels)
@@ -65,7 +126,7 @@ export class TSMT$DataFrame
    */
   public fromArray(data: Array<Array<any>>, dataTypes: Array<number>): void
   {
-    if (!data || data.length < 2) {
+    if (data == undefined || data == null || data.length < 2) {
       return;
     }
 

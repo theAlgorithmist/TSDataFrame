@@ -189,6 +189,8 @@ A data frame is typically loaded into an instance of _TSMT$DataFrame_ using the 
 
 For demonstration purposes, I took the 'used cars' dataset used in the book 'Machine Learning in R' by Lantz and loaded it into a data frame, then performed some of the analysis that was done in the book.
 
+NOTE: Category names are case sensitive!
+
 Refer to the specs in the _test_ folder for examples of using each of the classes.
 
 
