@@ -78,6 +78,8 @@ export class TSMT$DataFrame
 
     const keys: Array<string> = Object.keys(data[0]);
 
+    this.__clear();
+
     // remove '_id' and 'id'
     let index: number = keys.indexOf('_id');
     if (index != -1) {
